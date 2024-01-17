@@ -45,6 +45,7 @@ namespace TestApplication.Utils
                 long deletedRows = 0;
                 using (var file = File.OpenText(filePath))
                 {
+                    var lastUpdateDate = DateTime.Now;
                     while (!file.EndOfStream)
                     {
                         var line = file.ReadLine();
@@ -63,8 +64,9 @@ namespace TestApplication.Utils
                                     FloatNumber = decimal.Parse(values[4],System.Globalization.NumberStyles.AllowDecimalPoint),
                                 };
                                 dbContext.RandomRows.Add(randomRow);
-                                if(row % 10000 == 0)
+                                if((DateTime.Now - lastUpdateDate).TotalSeconds > 3)
                                 {
+                                    lastUpdateDate = DateTime.Now;
                                     await dbContext.SaveChangesAsync();
                                     onProcess(new WorkerEventArgs(row,rowCount));
                                 }
