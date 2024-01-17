@@ -1,0 +1,44 @@
+﻿<Window x:Class="TestApplication.Windows.DatabaseConfigurationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TestApplication.Windows"
+        mc:Ignorable="d"
+        Title="DatabaseConfigurationWindow" Height="350" Width="500">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.ColumnSpan="2" FontSize="16" VerticalAlignment="Center" TextAlignment="Center" FontWeight="Bold">Database configuration</TextBlock>
+        
+        <TextBlock Grid.Row="1" TextAlignment="Right" VerticalAlignment="Center" Margin="10">Hostname or ip-address</TextBlock>
+        <TextBox x:Name="PostgresHost" Grid.Row="1" Grid.Column="1" TextAlignment="Left" Width="150" 
+                 HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10"></TextBox>
+        <TextBlock Grid.Row="2" TextAlignment="Right" VerticalAlignment="Center" Margin="10">Server port</TextBlock>
+        <TextBox x:Name="PostgresPort" Grid.Row="2" Grid.Column="1" TextAlignment="Left" Width="150" 
+         HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10" TextChanged="PostgresPort_TextChanged"></TextBox>
+        <TextBlock Grid.Row="3" TextAlignment="Right" VerticalAlignment="Center" Margin="10">Database name</TextBlock>
+        <TextBox x:Name="PostgresDatabase" Grid.Row="3" Grid.Column="1" TextAlignment="Left" Width="150" 
+         HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10"></TextBox>
+        <TextBlock Grid.Row="4" TextAlignment="Right" VerticalAlignment="Center" Margin="10">Username</TextBlock>
+        <TextBox x:Name="PostgresUser" Grid.Row="4" Grid.Column="1" TextAlignment="Left" Width="150" 
+         HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10"></TextBox>
+        <TextBlock Grid.Row="5" TextAlignment="Right" VerticalAlignment="Center" Margin="10">Password</TextBlock>
+        <TextBox x:Name="PostgresPassword" Grid.Row="5" Grid.Column="1" Width="150"
+         HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10"></TextBox>
+        
+        <Button x:Name="SaveButton" Grid.Row="6" Width="150" Height="30" HorizontalAlignment="Right" Margin="20,0" Click="SaveButton_Click">Save</Button>
+        <Button x:Name="CancelButton" Grid.Row="6" Width="150" Height="30" Grid.Column="1" HorizontalAlignment="Left" Margin="20,0" Click="CancelButton_Click">Cancel</Button>
+    </Grid>
+</Window>
