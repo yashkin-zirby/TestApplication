@@ -10,11 +10,13 @@ using System.Windows;
 
 namespace TestApplication.Utils
 {
-    class ExcelAccountingReader : IDisposable
+    public class ExcelAccountingReader : IDisposable
     {
         private static ExcelEngine? engine = null;
         private static IApplication? application = null;
         private IWorkbook workbook;
+        private string fileName;
+        public string FileName { get { return fileName; } }
         public ExcelAccountingReader(string fileName)
         {
             if(engine == null)
@@ -26,7 +28,7 @@ namespace TestApplication.Utils
                 application = engine.Excel;
                 application.DefaultVersion = ExcelVersion.Xlsx;
             }
-
+            this.fileName = fileName;
             FileStream inputStream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             workbook = application.Workbooks.Open(inputStream);
             workbook.Worksheets[0].ExportDataTableEvent += new WorksheetImpl.ExportDataTableEventHandler((args) =>
@@ -54,6 +56,10 @@ namespace TestApplication.Utils
         public string ReadString(string cell)
         {
             return workbook.Worksheets[0].Range[cell].Value;
+        }
+        public DateTime? ReadDateTime(string cell)
+        {
+            return workbook.Worksheets[0].Range[cell].HasDateTime ? workbook.Worksheets[0].Range[cell].DateTime : null;
         }
         public double? ReadNumber(string cell)
         {

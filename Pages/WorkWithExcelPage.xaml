@@ -9,6 +9,40 @@
       Title="WorkWithExcelPage">
 
     <Grid>
-        <Button x:Name="ExportExcelDataButton" Click="ExportExcelDataButton_Click">Read First Cell</Button>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Background="White" TextAlignment="Center" Padding="15" FontSize="14">Загруженные файлы</TextBlock>
+        <ScrollViewer Grid.Row="1" Grid.RowSpan="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
+            <ListView x:Name="ImportedFilesView"/>
+        </ScrollViewer>
+        <Button Grid.Column="1" Grid.RowSpan="2" x:Name="ExportExcelDataButton" Click="ExportExcelDataButton_Click">Import Data From Excel</Button>
+        <Border Grid.Column="1" Grid.Row="2" Background="White" BorderBrush="Black" BorderThickness="1">
+            <Grid>
+                <DataGrid x:Name="AccountingTable"
+                          AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Binding="{Binding Code}" Header="Б/cч"/>
+                        <DataGridTextColumn Binding="{Binding OpeningBalanceActive}" Header="Входящее сальдо (Актив)"/>
+                        <DataGridTextColumn Binding="{Binding OpeningBalancePassive}" Header="Входящее сальдо (Пассив)"/>
+                        <DataGridTextColumn Binding="{Binding Debit}" Header="Обороты (Дебет)"/>
+                        <DataGridTextColumn Binding="{Binding Credit}" Header="Обороты (Кредит)"/>
+                        <DataGridTextColumn Binding="{Binding ClosingBalanceActive}" Header="Исходящее сальдо (Актив)"/>
+                        <DataGridTextColumn Binding="{Binding ClosingBalancePassive}" Header="Исходящее сальдо (Пассив)"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+        <Grid Background="#E9E9E9" x:Name="ProgressWindow" Visibility="Collapsed" Grid.RowSpan="3" Grid.ColumnSpan="2">
+            <TextBlock x:Name="ProgressBarTitle" VerticalAlignment="Center" TextAlignment="Center" Margin="0,0,0,40">Import Data From Excel</TextBlock>
+            <ProgressBar x:Name="TaskProgressBar" VerticalAlignment="Center" Margin="0,40,0,0" Height="10" Value="10" Maximum="20"></ProgressBar>
+            <TextBlock x:Name="ProgressBarDescription" VerticalAlignment="Bottom" TextAlignment="Center" Margin="0,50,0,0"></TextBlock>
+        </Grid>
     </Grid>
 </Page>
