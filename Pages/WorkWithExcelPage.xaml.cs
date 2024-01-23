@@ -39,7 +39,7 @@ namespace TestApplication.Pages
         private void UpdateExportedFileList()
         {
             Mouse.OverrideCursor = Cursors.Wait;
-            LoadingText.Text = "Loading";
+            LoadingText.Visibility = Visibility.Visible;
             var task = Task.Run(async()=>await DbWorker.GetTurnoverSheets());
             task.ContinueWith(t =>
             {
@@ -53,8 +53,7 @@ namespace TestApplication.Pages
                     Dispatcher.Invoke(() =>
                     {
                         Mouse.OverrideCursor = Cursors.Arrow;
-                        LoadingText.Text = "";
-                        ProgressWindow.Visibility = Visibility.Collapsed;
+                        LoadingText.Visibility = Visibility.Collapsed;
                     });
                     if (exception.InnerExceptions.Any(ex => ex is DBConnectionNotConfiguredException))
                     {
@@ -70,7 +69,7 @@ namespace TestApplication.Pages
                 var buttons = result.Result.Select(n =>
                 {
                     var button = new Button();
-                    button.Content = $"{n.ReportYear}) {n.FileName}";
+                    button.Content = $"Statement for {n.ReportYear.Year-1} | {n.FileName}";
                     button.Click += (sender, e) =>
                     {
                         DbWorker.GetAccountingSheets(n.SheetId).ContinueWith(result => {

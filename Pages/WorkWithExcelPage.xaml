@@ -15,14 +15,14 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="*" MinWidth="200"/>
+            <ColumnDefinition Width="5*"/>
         </Grid.ColumnDefinitions>
-        <TextBlock Background="White" TextAlignment="Center" Padding="15" FontSize="14">Загруженные файлы</TextBlock>
-        <ScrollViewer Grid.Row="1" Grid.RowSpan="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
+        <TextBlock Background="White" TextAlignment="Center" Padding="15" FontSize="14">Loaded files</TextBlock>
+        <ScrollViewer Grid.Row="1" Grid.RowSpan="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
             <ListView x:Name="ImportedFilesView"/>
         </ScrollViewer>
-        <TextBlock x:Name="LoadingText" Grid.Row="2" TextAlignment="Center">Loading</TextBlock>
+        <TextBlock x:Name="LoadingText" Grid.Row="2" TextAlignment="Center" VerticalAlignment="Center" Visibility="Visible">Loading</TextBlock>
         <Button Grid.Column="1" Grid.RowSpan="2" x:Name="ExportExcelDataButton" Click="ExportExcelDataButton_Click">Import Data From Excel</Button>
         <Border Grid.Column="1" Grid.Row="2" Background="White" BorderBrush="Black" BorderThickness="1">
             <Grid>
