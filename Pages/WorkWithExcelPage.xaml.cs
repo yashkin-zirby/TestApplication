@@ -100,23 +100,40 @@ namespace TestApplication.Pages
                     TaskProgressBar.Value = 0;
                     TaskProgressBar.Maximum = 1;
                     ExcelAccountingReader reader = new ExcelAccountingReader(openFileDialog.FileName);
-                    DbWorker.ImportAccountingDataFromExcel(reader, (args) =>
+                    var task = Task.Run(async ()=>await DbWorker.ImportAccountingDataFromExcel(reader, (args) =>
                     {
                         Dispatcher.Invoke(() => {
                             TaskProgressBar.Value = args.Progress;
                             TaskProgressBar.Maximum = args.Count;
-                            if (args.Progress == args.Count) {
+                            if (args.Progress == args.Count)
+                            {
                                 ProgressWindow.Visibility = Visibility.Collapsed;
                                 UpdateExportedFileList();
                             }
                         });
-                    });
-                }
-                catch (DBConnectionNotConfiguredException ex)
-                {
-                    ProgressWindow.Visibility = Visibility.Collapsed;
-                    MessageBox.Show(ex.Message);
-                    new DatabaseConfigurationWindow().ShowDialog();
+                    }));
+                    task.ContinueWith(t =>
+                    {
+                        var exception = t.Exception;
+                        if (exception != null)
+                        {
+                            foreach (var ex in exception.InnerExceptions)
+                            {
+                                MessageBox.Show(ex.Message);
+                            }
+                            Dispatcher.Invoke(() =>
+                            {
+                                ProgressWindow.Visibility = Visibility.Collapsed;
+                            });
+                            if (exception.InnerExceptions.Any(ex => ex is DBConnectionNotConfiguredException))
+                            {
+                                Dispatcher.Invoke(() =>
+                                {
+                                    new DatabaseConfigurationWindow().ShowDialog();
+                                });
+                            }
+                        }
+                    }, TaskContinuationOptions.OnlyOnFaulted);
                 }
                 catch (Exception ex)
                 {

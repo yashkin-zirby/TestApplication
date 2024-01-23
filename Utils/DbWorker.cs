@@ -119,7 +119,7 @@ namespace TestApplication.Utils
             }
             throw new DBConnectionNotConfiguredException("Unable to connect to database server");
         }
-        public static async void ImportAccountingDataFromExcel(ExcelAccountingReader reader, WorkerDoTaskHandler onProcess)
+        public static async Task ImportAccountingDataFromExcel(ExcelAccountingReader reader, WorkerDoTaskHandler onProcess)
         {
             if (await CheckDbContext() && dbContext != null)
             {
