@@ -3,7 +3,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:TestApplication.Pages"
+      xmlns:local="clr-namespace:TestApplication.Pages" Loaded="Page_Loaded"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="WorkWithExcelPage">
@@ -22,6 +22,7 @@
         <ScrollViewer Grid.Row="1" Grid.RowSpan="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
             <ListView x:Name="ImportedFilesView"/>
         </ScrollViewer>
+        <TextBlock x:Name="LoadingText" Grid.Row="2" TextAlignment="Center">Loading</TextBlock>
         <Button Grid.Column="1" Grid.RowSpan="2" x:Name="ExportExcelDataButton" Click="ExportExcelDataButton_Click">Import Data From Excel</Button>
         <Border Grid.Column="1" Grid.Row="2" Background="White" BorderBrush="Black" BorderThickness="1">
             <Grid>

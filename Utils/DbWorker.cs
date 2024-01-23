@@ -20,7 +20,7 @@ namespace TestApplication.Utils
     public static class DbWorker
     {
         private static AppDbContext? dbContext = null;
-        public static bool CheckDbContext()
+        public static async Task<bool> CheckDbContext()
         {
             if (dbContext == null)
             {
@@ -28,7 +28,7 @@ namespace TestApplication.Utils
                 {
                     dbContext = new AppDbContext();
                     if (dbContext.Database.EnsureCreated()) {
-                        dbContext.Database.ExecuteSqlRaw(@"
+                        await dbContext.Database.ExecuteSqlRawAsync(@"
                             CREATE VIEW public.""AccountingView"" as
                             select ts.""TurnoverSheet"", ts.""AccountCode"", ts.""Debit"", ts.""Credit"",
                         		(case when ast.""AccountType"" = 'ACTIVE' then ast.""OpeningBalance"" else 0 END) ""OpeningBalanceActive"",
@@ -39,26 +39,25 @@ namespace TestApplication.Utils
                     }
                     return true;
                 }
-                catch(Exception e)
+                catch
                 {
-                    MessageBox.Show(e.Message);
                     dbContext = null;
                     return false;
                 }
             }
             return true;
         }
-        public static List<TurnoverSheet> GetTurnoverSheets()
+        public static async Task<List<TurnoverSheet>> GetTurnoverSheets()
         {
-            if (CheckDbContext() && dbContext != null)
+            if (await CheckDbContext() && dbContext != null)
             {
                 return dbContext.TurnoverSheets.ToList();
             }
             throw new DBConnectionNotConfiguredException("Unable to connect to database server");
         }
-        public static List<AccountingView> GetAccountingSheets(int turnoverSheet)
+        public static async Task<List<AccountingView>> GetAccountingSheets(int turnoverSheet)
         {
-            if (CheckDbContext() && dbContext != null)
+            if (await CheckDbContext() && dbContext != null)
             {
                 return dbContext.AccountingView.Where(n => n.TurnoverSheetId == turnoverSheet).ToList();
             }
@@ -67,16 +66,15 @@ namespace TestApplication.Utils
         public static async Task<long> ImportSpecifiedFileToDatabase(string filePath, bool dropInvalidRows, WorkerDoTaskHandler onProcess)
         {
             if (!File.Exists(filePath)) throw new FileNotFoundException($"File {filePath} not found");
-            if (CheckDbContext() && dbContext != null)
+            if (await CheckDbContext() && dbContext != null)
             {
                 var fileInfo = new FileInfo(filePath);
-                long rowCount = (long)Math.Round(fileInfo.Length / 69m); //69 length in bytes of row
+                long rowCount = (long)Math.Round(fileInfo.Length / 70.5m); //avg length in bytes of row
                 dbContext.TruncateRandomRowsTable();
                 long row = 0;
                 long deletedRows = 0;
                 using (var file = File.OpenText(filePath))
                 {
-                    var lastUpdateDate = DateTime.Now;
                     while (!file.EndOfStream)
                     {
                         var line = file.ReadLine();
@@ -95,9 +93,8 @@ namespace TestApplication.Utils
                                     FloatNumber = decimal.Parse(values[4],System.Globalization.NumberStyles.AllowDecimalPoint),
                                 };
                                 dbContext.RandomRows.Add(randomRow);
-                                if((DateTime.Now - lastUpdateDate).TotalSeconds > 3)
+                                if((row & 65535) == 0)
                                 {
-                                    lastUpdateDate = DateTime.Now;
                                     await dbContext.SaveChangesAsync();
                                     onProcess(new WorkerEventArgs(row,rowCount));
                                 }
@@ -124,7 +121,7 @@ namespace TestApplication.Utils
         }
         public static async void ImportAccountingDataFromExcel(ExcelAccountingReader reader, WorkerDoTaskHandler onProcess)
         {
-            if (CheckDbContext() && dbContext != null)
+            if (await CheckDbContext() && dbContext != null)
             {
                 string bank = reader.ReadString("A1");
                 var date = reader.ReadDateTime("A6");

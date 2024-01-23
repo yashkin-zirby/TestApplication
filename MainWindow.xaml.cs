@@ -135,7 +135,7 @@ namespace TestApplication
                 TaskProgressBar.Maximum = 1;
                 ProgressBarTitle.Text = "Import rows to database";
                 ProgressBarDescription.Text = "";
-                var task = Utils.DbWorker.ImportSpecifiedFileToDatabase(resultFile, dropRows, args =>
+                var task = Task.Run(async ()=> await DbWorker.ImportSpecifiedFileToDatabase(resultFile, dropRows, args =>
                 {
                     Dispatcher.Invoke(() =>
                     {
@@ -143,7 +143,7 @@ namespace TestApplication
                         TaskProgressBar.Maximum = args.Count;
                         ProgressBarDescription.Text = $"Rows processed: {args.Progress} / {args.Count}";
                     });
-                });
+                }));
                 task.ContinueWith(t =>
                 {
                     var exception = t.Exception;

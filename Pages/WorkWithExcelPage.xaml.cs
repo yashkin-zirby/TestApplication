@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -34,34 +35,60 @@ namespace TestApplication.Pages
             openFileDialog.InitialDirectory = Directory.GetCurrentDirectory();
             openFileDialog.Title = "Choose file for import to database";
             openFileDialog.DefaultExt = ".xlsx";
-            UpdateExportedFileList();
         }
         private void UpdateExportedFileList()
         {
-            try
+            Mouse.OverrideCursor = Cursors.Wait;
+            LoadingText.Text = "Loading";
+            var task = Task.Run(async()=>await DbWorker.GetTurnoverSheets());
+            task.ContinueWith(t =>
             {
-                ImportedFilesView.ItemsSource = DbWorker.GetTurnoverSheets()
-                    .Select(n =>
+                var exception = t.Exception;
+                if (exception != null)
+                {
+                    foreach (var ex in exception.InnerExceptions)
                     {
-                        var button = new Button();
-                        button.Content = $"{n.ReportYear}) {n.FileName}";
-                        button.Click += (sender, e) =>
-                        {
-                            var view = DbWorker.GetAccountingSheets(n.SheetId);
-                            MessageBox.Show(view.Count.ToString());
-                            AccountingTable.ItemsSource = view;
-                        };
-                        return button;
+                        MessageBox.Show(ex.Message);
+                    }
+                    Dispatcher.Invoke(() =>
+                    {
+                        Mouse.OverrideCursor = Cursors.Arrow;
+                        LoadingText.Text = "";
+                        ProgressWindow.Visibility = Visibility.Collapsed;
                     });
-            }
-            catch (DBConnectionNotConfiguredException e)
+                    if (exception.InnerExceptions.Any(ex => ex is DBConnectionNotConfiguredException))
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            new DatabaseConfigurationWindow().ShowDialog();
+                        });
+                    }
+                }
+            }, TaskContinuationOptions.OnlyOnFaulted);
+            task.ContinueWith(result =>
             {
-                MessageBox.Show(e.Message);
-                new DatabaseConfigurationWindow().ShowDialog();
-            }catch(Exception e)
-            {
-                MessageBox.Show(e.Message);
-            }
+                var buttons = result.Result.Select(n =>
+                {
+                    var button = new Button();
+                    button.Content = $"{n.ReportYear}) {n.FileName}";
+                    button.Click += (sender, e) =>
+                    {
+                        DbWorker.GetAccountingSheets(n.SheetId).ContinueWith(result => {
+                            Dispatcher.Invoke(() => {
+                                AccountingTable.ItemsSource = result.Result;
+                            });
+                        }, TaskContinuationOptions.OnlyOnRanToCompletion);
+                    };
+                    return button;
+                });
+                Dispatcher.Invoke(() =>
+                {
+                    Mouse.OverrideCursor = Cursors.Arrow;
+                    LoadingText.Text = "";
+                    ProgressWindow.Visibility = Visibility.Collapsed;
+                    ImportedFilesView.ItemsSource = buttons;
+                });
+            }, TaskContinuationOptions.OnlyOnRanToCompletion);
         }
         private void ExportExcelDataButton_Click(object sender, RoutedEventArgs e)
         {
@@ -74,12 +101,12 @@ namespace TestApplication.Pages
                     TaskProgressBar.Value = 0;
                     TaskProgressBar.Maximum = 1;
                     ExcelAccountingReader reader = new ExcelAccountingReader(openFileDialog.FileName);
-                    TaskProgressBar.Maximum = reader.LastRow;
                     DbWorker.ImportAccountingDataFromExcel(reader, (args) =>
                     {
                         Dispatcher.Invoke(() => {
                             TaskProgressBar.Value = args.Progress;
-                            if(args.Progress == args.Count) {
+                            TaskProgressBar.Maximum = args.Count;
+                            if (args.Progress == args.Count) {
                                 ProgressWindow.Visibility = Visibility.Collapsed;
                                 UpdateExportedFileList();
                             }
@@ -98,6 +125,11 @@ namespace TestApplication.Pages
                     MessageBox.Show(ex.Message);
                 }
             }
+        }
+
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            UpdateExportedFileList();
         }
     }
 }
